@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace ExtendAllTheThings
+namespace ExtendAllTheThings.Extensions
 {
 	public static class StringExtensions
 	{
@@ -37,7 +37,7 @@ namespace ExtendAllTheThings
 		/// <param name = "value">The string to check.</param>
 		/// <param name = "defaultValue">The default value.</param>
 		/// <returns>Either the string or the default value.</returns>
-		public static string IfEmpty(this string value, string defaultValue)
+		public static string OrDefault(this string value, string defaultValue)
 		{
 			return value.IsNotNull() ? value : defaultValue;
 		}
@@ -373,7 +373,7 @@ namespace ExtendAllTheThings
 				separator = string.Empty;
 			}
 
-			string converter(T o) => o.ToString();
+			static string converter(T o) => o.ToString();
 			return string.Join(separator, Array.ConvertAll(value, converter));
 		}
 
@@ -1136,7 +1136,7 @@ namespace ExtendAllTheThings
 		/// </example>
 		public static byte[] ToBytes(this string value, Encoding encoding)
 		{
-			encoding = encoding ?? Encoding.Default;
+			encoding ??= Encoding.Default;
 			return encoding.GetBytes(value);
 		}
 
@@ -1158,7 +1158,7 @@ namespace ExtendAllTheThings
 		/// <returns>The Base 64 encoded string</returns>
 		public static string EncodeBase64(this string value, Encoding encoding)
 		{
-			encoding = encoding ?? Encoding.UTF8;
+			encoding ??= Encoding.UTF8;
 			byte[] bytes = encoding.GetBytes(value);
 			return Convert.ToBase64String(bytes);
 		}
@@ -1181,7 +1181,7 @@ namespace ExtendAllTheThings
 		/// <returns>The decoded string</returns>
 		public static string DecodeBase64(this string encodedValue, Encoding encoding)
 		{
-			encoding = encoding ?? Encoding.UTF8;
+			encoding ??= Encoding.UTF8;
 			byte[] bytes = Convert.FromBase64String(encodedValue);
 			return encoding.GetString(bytes);
 		}

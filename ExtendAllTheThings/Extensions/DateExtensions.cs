@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace ExtendAllTheThings
+namespace ExtendAllTheThings.Extensions
 {
 	//TODO: refactor to use System.DateTime
-	public static class Dates
+	public static class DateExtensions
 	{
 		/// <summary>
 		/// A timestamp localized to a given time zone.
@@ -13,7 +13,7 @@ namespace ExtendAllTheThings
 		public static DateTime Now(string TimeZoneID)
 		{
 			DateTime utcTime = DateTime.UtcNow;
-			var tzi = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneID);
+			TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneID);
 			return TimeZoneInfo.ConvertTimeFromUtc(utcTime, tzi);
 		}
 
@@ -50,12 +50,12 @@ namespace ExtendAllTheThings
 		public static bool IsFederalHoliday(this DateTime date)
 		{
 			// to ease typing
-			var nthWeekDay = (int)Math.Ceiling(date.Day / 7.0d);
+			int nthWeekDay = (int)Math.Ceiling(date.Day / 7.0d);
 			DayOfWeek dayName = date.DayOfWeek;
-			var isThursday = dayName == DayOfWeek.Thursday;
-			var isFriday = dayName == DayOfWeek.Friday;
-			var isMonday = dayName == DayOfWeek.Monday;
-			var isWeekend = dayName == DayOfWeek.Saturday || dayName == DayOfWeek.Sunday;
+			bool isThursday = dayName == DayOfWeek.Thursday;
+			bool isFriday = dayName == DayOfWeek.Friday;
+			bool isMonday = dayName == DayOfWeek.Monday;
+			bool isWeekend = dayName == DayOfWeek.Saturday || dayName == DayOfWeek.Sunday;
 
 			// New Years Day (Jan 1, or preceding Friday/following Monday if weekend)
 			if ((date.Month == 12 && date.Day == 31 && isFriday) ||
@@ -139,39 +139,39 @@ namespace ExtendAllTheThings
 				// Gauss Calculation
 				////////////////////
 
-				var Month = 3;
+				int Month = 3;
 
 				// Determine the Golden number:
-				var G = (Year % 19) + 1;
+				int G = (Year % 19) + 1;
 
 				// Determine the century number:
-				var Century = (Year / 100) + 1;
+				int Century = (Year / 100) + 1;
 
 				// Correct for the years who are not leap years:
-				var X = ((3 * Century) / 4) - 12;
+				int X = (3 * Century / 4) - 12;
 
 				// Moon correction:
-				var Y = ((8 * Century + 5) / 25) - 5;
+				int Y = (((8 * Century) + 5) / 25) - 5;
 
 				// Find Sunday:
-				var Z = (5 * Year) / 4 - X - 10;
+				int Z = (5 * Year / 4) - X - 10;
 
 				// Determine exact(age of moon on 1 January of that year(follows a cycle of 19 years)):
-				var E = ((11 * G) + 20 + Y - X) % 30;
+				int E = ((11 * G) + 20 + Y - X) % 30;
 				if (E == 24) { E++; }
 				if ((E == 25) && (G > 11)) { E++; }
 
 				// Get the full moon:
-				var N = 44 - E;
-				if (N < 21) { N = N + 30; }
+				int N = 44 - E;
+				if (N < 21) { N += 30; }
 
 				// Up to Sunday:
-				var P = (N + 7) - ((Z + N) % 7);
+				int P = N + 7 - ((Z + N) % 7);
 
 				// Easter date:
 				if (P > 31)
 				{
-					P = P - 31;
+					P -= 31;
 					Month = 4;
 				}
 				return new DateTime(Year, Month, P);
@@ -182,16 +182,9 @@ namespace ExtendAllTheThings
 		{
 			// they can pick a time up until 1pm (13:00:00)
 			// therefore, we can match on any time after that.
-			var closingTime = new DateTime(dateTimeRequested.Year, 12, 24, 13, 0, 0);
+			DateTime closingTime = new DateTime(dateTimeRequested.Year, 12, 24, 13, 0, 0);
 
-			if (dateTimeRequested.Month == 12 && dateTimeRequested.Day == 24 && dateTimeRequested > closingTime)
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return dateTimeRequested.Month == 12 && dateTimeRequested.Day == 24 && dateTimeRequested > closingTime;
 		}
 	}
 }

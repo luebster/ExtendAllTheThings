@@ -1,4 +1,4 @@
-﻿namespace ExtendAllTheThings
+﻿namespace ExtendAllTheThings.Extensions
 {
 	public static class ObjectExtensions
 	{

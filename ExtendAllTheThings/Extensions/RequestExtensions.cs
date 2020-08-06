@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace ExtendAllTheThings
+namespace ExtendAllTheThings.Extensions
 {
 	public static class RequestExtensions
 	{

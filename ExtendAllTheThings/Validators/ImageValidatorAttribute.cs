@@ -4,7 +4,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
-namespace ExtendAllTheThings
+namespace ExtendAllTheThings.CustomValidators
 {
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
 	public sealed class ImageValidatorAttribute : ValidationAttribute
@@ -17,15 +17,19 @@ namespace ExtendAllTheThings
 		{
 			if (value == null)
 			{
-				if (!Required) return true;
+				if (!Required)
+				{
+					return true;
+				}
+
 				ErrorMessage = "You must upload an image.";
 				return false;
 			}
 
-			var image = (IFormFile)value;
+			IFormFile image = (IFormFile)value;
 			const int size = 1024 * 1024 * 8; // 8 MB
 
-			var retlval = FileIsWebFriendlyImage(image, size);
+			bool retlval = FileIsWebFriendlyImage(image, size);
 			return retlval;
 		}
 
@@ -43,7 +47,7 @@ namespace ExtendAllTheThings
 
 		public static bool FileIsWebFriendlyImage(IFormFile image, long size)
 		{
-			var retval = image.Length <= size && FileIsWebFriendlyImage(image);
+			bool retval = image.Length <= size && FileIsWebFriendlyImage(image);
 			return retval;
 		}
 	}
