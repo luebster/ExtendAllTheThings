@@ -6,23 +6,6 @@ namespace ExtendAllTheThings.Extensions
 	public static class DateExtensions
 	{
 		/// <summary>
-		/// A timestamp localized to a given time zone.
-		/// </summary>
-		/// <param name="TimeZoneID"></param>
-		/// <returns></returns>
-		public static DateTime Now(string TimeZoneID)
-		{
-			DateTime utcTime = DateTime.UtcNow;
-			TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneID);
-			return TimeZoneInfo.ConvertTimeFromUtc(utcTime, tzi);
-		}
-
-		public static DateTime Now()
-		{
-			return Now("Eastern Standard Time");
-		}
-
-		/// <summary>
 		/// Ex: August 12, 2020
 		/// </summary>
 		/// <param name="date"></param>
@@ -133,7 +116,7 @@ namespace ExtendAllTheThings.Extensions
 		/// </summary>
 		/// <param name="year">Year of easter</param>
 		/// <returns>DateTime of Catholic Easter</returns>
-		public static DateTime GetCatholicEaster(int Year)
+		public static DateTime GetCatholicEaster(this int Year)
 		{
 			{
 				// Gauss Calculation
@@ -178,7 +161,7 @@ namespace ExtendAllTheThings.Extensions
 			}
 		}
 
-		public static bool IsChristmasEve(DateTime dateTimeRequested)
+		public static bool IsChristmasEve(this DateTime dateTimeRequested)
 		{
 			// they can pick a time up until 1pm (13:00:00)
 			// therefore, we can match on any time after that.

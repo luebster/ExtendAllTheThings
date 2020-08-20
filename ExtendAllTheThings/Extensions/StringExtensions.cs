@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 
 namespace ExtendAllTheThings.Extensions
 {
@@ -32,14 +31,16 @@ namespace ExtendAllTheThings.Extensions
 		}
 
 		/// <summary>
-		/// 	Checks whether the string is empty and returns a default value in case.
+		/// Get the first not null/empty string
 		/// </summary>
-		/// <param name = "value">The string to check.</param>
-		/// <param name = "defaultValue">The default value.</param>
-		/// <returns>Either the string or the default value.</returns>
-		public static string OrDefault(this string value, string defaultValue)
+		/// <param name="str"></param>
+		/// <param name="strings"></param>
+		/// <returns></returns>
+		public static string Coalesce(this string str, params string[] strings)
 		{
-			return value.IsNotNull() ? value : defaultValue;
+			return (new[] { str })
+					.Concat(strings)
+					.FirstOrDefault(s => !string.IsNullOrEmpty(s));
 		}
 
 		/// <summary>
@@ -88,20 +89,6 @@ namespace ExtendAllTheThings.Extensions
 		public static bool Contains(this string inputValue, string comparisonValue, StringComparison comparisonType)
 		{
 			return inputValue.IndexOf(comparisonValue, comparisonType) != -1;
-		}
-
-		/// <summary>
-		/// 	Determines whether the comparison value string is contained within the input value string without any
-		///     consideration about the case (<see cref="StringComparison.InvariantCultureIgnoreCase"/>).
-		/// </summary>
-		/// <param name = "inputValue">The input value.</param>
-		/// <param name = "comparisonValue">The comparison value.  Case insensitive</param>
-		/// <returns>
-		/// 	<c>true</c> if input value contains the specified value (case insensitive), otherwise, <c>false</c>.
-		/// </returns>
-		public static bool ContainsEquivalenceTo(this string inputValue, string comparisonValue)
-		{
-			return BothStringsAreEmpty(inputValue, comparisonValue) || StringContainsEquivalence(inputValue, comparisonValue);
 		}
 
 		/// <summary>
@@ -234,7 +221,7 @@ namespace ExtendAllTheThings.Extensions
 		/// </remarks>
 		public static string ExtractDigits(this string value)
 		{
-			return value.Where(char.IsDigit).Aggregate(new StringBuilder(value.Length), (sb, c) => sb.Append(c)).ToString();
+			return new string(value.Where(p => char.IsDigit(p)).ToArray());
 		}
 
 		#endregion Extract
@@ -1109,85 +1096,6 @@ namespace ExtendAllTheThings.Extensions
 
 		#endregion Regex based extension methods
 
-		#region Bytes & Base64
-
-		/// <summary>
-		/// 	Converts the string to a byte-array using the default encoding
-		/// </summary>
-		/// <param name = "value">The input string.</param>
-		/// <returns>The created byte array</returns>
-		public static byte[] ToBytes(this string value)
-		{
-			return value.ToBytes(null);
-		}
-
-		/// <summary>
-		/// 	Converts the string to a byte-array using the supplied encoding
-		/// </summary>
-		/// <param name = "value">The input string.</param>
-		/// <param name = "encoding">The encoding to be used.</param>
-		/// <returns>The created byte array</returns>
-		/// <example>
-		/// 	<code>
-		/// 		var value = "Hello World";
-		/// 		var ansiBytes = value.ToBytes(Encoding.GetEncoding(1252)); // 1252 = ANSI
-		/// 		var utf8Bytes = value.ToBytes(Encoding.UTF8);
-		/// 	</code>
-		/// </example>
-		public static byte[] ToBytes(this string value, Encoding encoding)
-		{
-			encoding ??= Encoding.Default;
-			return encoding.GetBytes(value);
-		}
-
-		/// <summary>
-		/// 	Encodes the input value to a Base64 string using the default encoding.
-		/// </summary>
-		/// <param name = "value">The input value.</param>
-		/// <returns>The Base 64 encoded string</returns>
-		public static string EncodeBase64(this string value)
-		{
-			return value.EncodeBase64(null);
-		}
-
-		/// <summary>
-		/// 	Encodes the input value to a Base64 string using the supplied encoding.
-		/// </summary>
-		/// <param name = "value">The input value.</param>
-		/// <param name = "encoding">The encoding.</param>
-		/// <returns>The Base 64 encoded string</returns>
-		public static string EncodeBase64(this string value, Encoding encoding)
-		{
-			encoding ??= Encoding.UTF8;
-			byte[] bytes = encoding.GetBytes(value);
-			return Convert.ToBase64String(bytes);
-		}
-
-		/// <summary>
-		/// 	Decodes a Base 64 encoded value to a string using the default encoding.
-		/// </summary>
-		/// <param name = "encodedValue">The Base 64 encoded value.</param>
-		/// <returns>The decoded string</returns>
-		public static string DecodeBase64(this string encodedValue)
-		{
-			return encodedValue.DecodeBase64(null);
-		}
-
-		/// <summary>
-		/// 	Decodes a Base 64 encoded value to a string using the supplied encoding.
-		/// </summary>
-		/// <param name = "encodedValue">The Base 64 encoded value.</param>
-		/// <param name = "encoding">The encoding.</param>
-		/// <returns>The decoded string</returns>
-		public static string DecodeBase64(this string encodedValue, Encoding encoding)
-		{
-			encoding ??= Encoding.UTF8;
-			byte[] bytes = Convert.FromBase64String(encodedValue);
-			return encoding.GetString(bytes);
-		}
-
-		#endregion Bytes & Base64
-
 		#region String to Enum
 
 		/// <summary>
@@ -1225,215 +1133,6 @@ namespace ExtendAllTheThings.Extensions
 		}
 
 		#endregion String to Enum
-
-		private static bool StringContainsEquivalence(string inputValue, string comparisonValue)
-		{
-			return inputValue.IsNotEmptyOrWhiteSpace() && inputValue.Contains(comparisonValue, StringComparison.InvariantCultureIgnoreCase);
-		}
-
-		private static bool BothStringsAreEmpty(string inputValue, string comparisonValue)
-		{
-			return inputValue.IsEmptyOrWhiteSpace() && comparisonValue.IsEmptyOrWhiteSpace();
-		}
-
-		/// <summary>
-		/// Return the string with the leftmost number_of_characters characters removed.
-		/// </summary>
-		/// <param name="str">The string being extended</param>
-		/// <param name="number_of_characters">The number of characters to remove.</param>
-		/// <returns></returns>
-		/// <remarks></remarks>
-		public static string RemoveLeft(this string str, int number_of_characters)
-		{
-			if (str.Length <= number_of_characters)
-			{
-				return "";
-			}
-
-			return str.Substring(number_of_characters);
-		}
-
-		/// <summary>
-		/// Return the string with the rightmost number_of_characters characters removed.
-		/// </summary>
-		/// <param name="str">The string being extended</param>
-		/// <param name="number_of_characters">The number of characters to remove.</param>
-		/// <returns></returns>
-		/// <remarks></remarks>
-		public static string RemoveRight(this string str, int number_of_characters)
-		{
-			if (str.Length <= number_of_characters)
-			{
-				return "";
-			}
-
-			return str.Substring(0, str.Length - number_of_characters);
-		}
-
-		/// <summary>
-		/// Convert a byte array into a hexadecimal string representation.
-		/// </summary>
-		/// <param name="bytes"></param>
-		/// <returns></returns>
-		/// <remarks></remarks>
-		public static string BytesToHexString(this byte[] bytes)
-		{
-			string result = "";
-			foreach (byte b in bytes)
-			{
-				result += " " + b.ToString("X").PadLeft(2, '0');
-			}
-			if (result.Length > 0)
-			{
-				result = result.Substring(1);
-			}
-
-			return result;
-		}
-
-		/// <summary>
-		/// Convert this string containing hexadecimal into a byte array.
-		/// </summary>
-		/// <param name="str">The hexadecimal string to convert.</param>
-		/// <returns></returns>
-		/// <remarks></remarks>
-		public static byte[] HexStringToBytes(this string str)
-		{
-			str = str.Replace(" ", "");
-			int max_byte = (str.Length / 2) - 1;
-			byte[] bytes = new byte[max_byte + 1];
-			for (int i = 0; i <= max_byte; i++)
-			{
-				bytes[i] = byte.Parse(str.Substring(2 * i, 2), NumberStyles.AllowHexSpecifier);
-			}
-
-			return bytes;
-		}
-
-		/// <summary>
-		/// Returns a default value if the string is null or empty.
-		/// </summary>
-		/// <param name="s">Original String</param>
-		/// <param name="defaultValue">The default value.</param>
-		/// <returns></returns>
-		public static string DefaultIfNullOrEmpty(this string s, string defaultValue)
-		{
-			return string.IsNullOrEmpty(s) ? defaultValue : s;
-		}
-
-		/// <summary>
-		/// Throws an <see cref="System.ArgumentException"/> if the string value is empty.
-		/// </summary>
-		/// <param name="obj">The value to test.</param>
-		/// <param name="message">The message to display if the value is null.</param>
-		/// <param name="name">The name of the parameter being tested.</param>
-		public static string ExceptionIfNullOrEmpty(this string obj, string message, string name)
-		{
-			if (string.IsNullOrEmpty(obj))
-			{
-				throw new ArgumentException(message, name);
-			}
-
-			return obj;
-		}
-
-		/// <summary>
-		/// Joins  the values of a string array if the values are not null or empty.
-		/// </summary>
-		/// <param name="objs">The string array used for joining.</param>
-		/// <param name="separator">The separator to use in the joined string.</param>
-		/// <returns></returns>
-		public static string JoinNotNullOrEmpty(this string[] objs, string separator)
-		{
-			List<string> items = new List<string>();
-			foreach (string s in objs)
-			{
-				if (!string.IsNullOrEmpty(s))
-				{
-					items.Add(s);
-				}
-			}
-			return string.Join(separator, items.ToArray());
-		}
-
-		/// <summary>
-		/// Parses the commandline params.
-		/// </summary>
-		/// <param name="value">The value.</param>
-		/// <returns>A StringDictionary type object of command line parameters.</returns>
-		public static StringDictionary ParseCommandlineParams(this string[] value)
-		{
-			StringDictionary parameters = new StringDictionary();
-			Regex spliter = new Regex("^-{1,2}|^/|=|:", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			Regex remover = new Regex(@"^['""]?(.*?)['""]?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			string parameter = null;
-
-			// Valid parameters forms:
-			// {-,/,--}param{ ,=,:}((",')value(",'))
-			// Examples: -param1 value1 --param2 /param3:"Test-:-work" /param4=happy -param5 '--=nice=--'
-			foreach (string txt in value)
-			{
-				// Look for new parameters (-,/ or --) and a possible enclosed value (=,:)
-				string[] Parts = spliter.Split(txt, 3);
-				switch (Parts.Length)
-				{
-					// Found a value (for the last parameter found (space separator))
-					case 1:
-						if (parameter != null)
-						{
-							if (!parameters.ContainsKey(parameter))
-							{
-								Parts[0] = remover.Replace(Parts[0], "$1");
-								parameters.Add(parameter, Parts[0]);
-							}
-							parameter = null;
-						}
-						// else Error: no parameter waiting for a value (skipped)
-						break;
-					// Found just a parameter
-					case 2:
-						// The last parameter is still waiting. With no value, set it to true.
-						if (parameter != null)
-						{
-							if (!parameters.ContainsKey(parameter))
-							{
-								parameters.Add(parameter, "true");
-							}
-						}
-						parameter = Parts[1];
-						break;
-					// Parameter with enclosed value
-					case 3:
-						// The last parameter is still waiting. With no value, set it to true.
-						if (parameter != null)
-						{
-							if (!parameters.ContainsKey(parameter))
-							{
-								parameters.Add(parameter, "true");
-							}
-						}
-						parameter = Parts[1];
-						// Remove possible enclosing characters (",')
-						if (!parameters.ContainsKey(parameter))
-						{
-							Parts[2] = remover.Replace(Parts[2], "$1");
-							parameters.Add(parameter, Parts[2]);
-						}
-						parameter = null;
-						break;
-				}
-			}
-			// In case a parameter is still waiting
-			if (parameter != null)
-			{
-				if (!parameters.ContainsKey(parameter))
-				{
-					parameters.Add(parameter, "true");
-				}
-			}
-
-			return parameters;
-		}
 
 		/// <summary>
 		/// Encodes the email address so that the link is still valid, but the email address is useless for email harvsters.
@@ -1486,158 +1185,6 @@ namespace ExtendAllTheThings.Extensions
 		}
 
 		/// <summary>
-		/// Calculates the SHA1 hash of the supplied string and returns a base 64 string.
-		/// </summary>
-		/// <param name="stringToHash">String that must be hashed.</param>
-		/// <returns>The hashed string or null if hashing failed.</returns>
-		/// <exception cref="ArgumentException">Occurs when stringToHash or key is null or empty.</exception>
-		public static string GetSHA1Hash(this string stringToHash)
-		{
-			if (string.IsNullOrEmpty(stringToHash))
-			{
-				return null;
-			}
-			//{
-			//    throw new ArgumentException("An empty string value cannot be hashed.");
-			//}
-
-			byte[] data = Encoding.UTF8.GetBytes(stringToHash);
-			byte[] hash = new SHA1CryptoServiceProvider().ComputeHash(data);
-			return Convert.ToBase64String(hash);
-		}
-
-		/// <summary>
-		/// Determines whether the string contains any of the provided values.
-		/// </summary>
-		/// <param name="this"></param>
-		/// <param name="values"></param>
-		/// <returns></returns>
-		public static bool ContainsAny(this string @this, params string[] values)
-		{
-			return @this.ContainsAny(StringComparison.CurrentCulture, values);
-		}
-
-		/// <summary>
-		/// Determines whether the string contains any of the provided values.
-		/// </summary>
-		/// <param name="this"></param>
-		/// <param name="comparisonType"></param>
-		/// <param name="values"></param>
-		/// <returns></returns>
-		public static bool ContainsAny(this string @this, StringComparison comparisonType, params string[] values)
-		{
-			foreach (string value in values)
-			{
-				if (@this.IndexOf(value, comparisonType) > -1)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		/// <summary>
-		/// Determines whether the string contains all of the provided values.
-		/// </summary>
-		/// <param name="this"></param>
-		/// <param name="values"></param>
-		/// <returns></returns>
-		public static bool ContainsAll(this string @this, params string[] values)
-		{
-			return @this.ContainsAll(StringComparison.CurrentCulture, values);
-		}
-
-		/// <summary>
-		/// Determines whether the string contains all of the provided values.
-		/// </summary>
-		/// <param name="this"></param>
-		/// <param name="comparisonType"></param>
-		/// <param name="values"></param>
-		/// <returns></returns>
-		public static bool ContainsAll(this string @this, StringComparison comparisonType, params string[] values)
-		{
-			foreach (string value in values)
-			{
-				if (@this.IndexOf(value, comparisonType) == -1)
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		/// <summary>
-		/// Determines whether the string is equal to any of the provided values.
-		/// </summary>
-		/// <param name="this"></param>
-		/// <param name="comparisonType"></param>
-		/// <param name="values"></param>
-		/// <returns></returns>
-		public static bool EqualsAny(this string @this, StringComparison comparisonType, params string[] values)
-		{
-			foreach (string value in values)
-			{
-				if (@this.Equals(value, comparisonType))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		/// <summary>
-		/// Wildcard comparison for any pattern
-		/// </summary>
-		/// <param name="value">The current <see cref="string"/> object</param>
-		/// <param name="patterns">The array of string patterns</param>
-		/// <returns></returns>
-		public static bool IsLikeAny(this string value, params string[] patterns)
-		{
-			foreach (string pattern in patterns)
-			{
-				if (value.IsLike(pattern))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		/// <summary>
-		/// Wildcard comparison
-		/// </summary>
-		/// <param name="value"></param>
-		/// <param name="pattern"></param>
-		/// <returns></returns>
-		public static bool IsLike(this string value, string pattern)
-		{
-			if (value == pattern)
-			{
-				return true;
-			}
-
-			if (pattern[0] == '*' && pattern.Length > 1)
-			{
-				for (int index = 0; index < value.Length; index++)
-				{
-					if (value.Substring(index).IsLike(pattern.Substring(1)))
-					{
-						return true;
-					}
-				}
-			}
-			else if (pattern[0] == '*')
-			{
-				return true;
-			}
-			else if (pattern[0] == value[0])
-			{
-				return value.Substring(1).IsLike(pattern.Substring(1));
-			}
-			return false;
-		}
-
-		/// <summary>
 		/// Truncates a string with optional Elipses added
 		/// </summary>
 		/// <param name="this"></param>
@@ -1658,6 +1205,40 @@ namespace ExtendAllTheThings.Extensions
 			}
 
 			return @this.Substring(0, length - e) + new string('.', e);
+		}
+
+		public static string Raw(this string str)
+		{
+			return HttpUtility.HtmlEncode(str);
+		}
+
+		public static string PhoneNumberFormatter(this string value)
+		{
+			value = new Regex(@"\D").Replace(value, string.Empty);
+			value = value.TrimStart('1');
+
+			if (value.Length == 0)
+			{
+				return string.Empty;
+			}
+			else if (value.Length < 3)
+			{
+				return string.Format("({0})", value.Substring(0, value.Length));
+			}
+			else if (value.Length < 7)
+			{
+				return string.Format("({0}) {1}", value.Substring(0, 3), value.Substring(3, value.Length - 3));
+			}
+			else if (value.Length < 11)
+			{
+				return string.Format("({0}) {1}-{2}", value.Substring(0, 3), value.Substring(3, 3), value.Substring(6));
+			}
+			else if (value.Length > 10)
+			{
+				value = value.Remove(value.Length - 1, 1);
+				return string.Format("{0}.{1}.{2}", value.Substring(0, 3), value.Substring(3, 3), value.Substring(6));
+			}
+			return value;
 		}
 	}
 }

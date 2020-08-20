@@ -21,13 +21,13 @@ namespace ExtendAllTheThings.Extensions
 			return Request.Host.Host.ToLower();
 		}
 
-		// e.g. https://pavey.azurewebsites.net/debug/?x=1&y=2
+		// e.g. https://foo.azurewebsites.net/debug/?x=1&y=2
 		public static string UrlHttps(this HttpRequest Request)
 		{
 			return string.Format("https://{0}{1}", Request.Host, Request.Path);
 		}
 
-		// e.g. http://pavey.azurewebsites.net/debug/?x=1&y=2
+		// e.g. http://foo.azurewebsites.net/debug/?x=1&y=2
 		public static string UrlHttp(this HttpRequest Request)
 		{
 			return string.Format("http://{0}{1}", Request.Host, Request.Path);
@@ -133,28 +133,6 @@ namespace ExtendAllTheThings.Extensions
 			// return empty string
 			return string.Empty;
 		}
-
-		// e.g. https://pavey.azurewebsites.net/
-		//public static string BaseUrl(this HttpRequest Request)
-		//{
-		//	// variables
-		//	string Authority = Request.Url.GetLeftPart(UriPartial.Authority).TrimStart('/').TrimEnd('/');
-		//	string ApplicationPath = Request.ApplicationPath.TrimStart('/').TrimEnd('/');
-
-		//	// add trailing slashes if necessary
-		//	if (Authority.Length > 0)
-		//	{
-		//		Authority += "/";
-		//	}
-
-		//	if (ApplicationPath.Length > 0)
-		//	{
-		//		ApplicationPath += "/";
-		//	}
-
-		//	// return
-		//	return string.Format("{0}{1}", Authority, ApplicationPath);
-		//}
 
 		// e.g. default, default.aspx
 		public static string PageName(this HttpRequest Request, bool IncludeExtension = false, bool IncludeQueryString = false)
