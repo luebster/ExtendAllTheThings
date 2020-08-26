@@ -1240,5 +1240,11 @@ namespace ExtendAllTheThings.Extensions
 			}
 			return value;
 		}
+
+		public static string GenerateSlug(this string phrase, int maxLength = 50)
+		{
+			var str = Regex.Replace(Regex.Replace(phrase.ToLower(), "[^a-z0-9\\s-]", ""), "[\\s-]{2,}", " ").Trim();
+			return Regex.Replace(str.Substring(0, str.Length <= maxLength ? str.Length : maxLength).Trim(), "\\s", "-");
+		}
 	}
 }
