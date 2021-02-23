@@ -62,7 +62,7 @@ namespace ExtendAllTheThings.Extensions
 		/// <returns></returns>
 		public static string TrimToMaxLength(this string value, int maxLength)
 		{
-			return value == null || value.Length <= maxLength ? value : value.Substring(0, maxLength);
+			return value == null || value.Length <= maxLength ? value : value[0..];
 		}
 
 		/// <summary>
@@ -74,11 +74,11 @@ namespace ExtendAllTheThings.Extensions
 		/// <returns></returns>
 		public static string TrimToMaxLength(this string value, int maxLength, string suffix)
 		{
-			return value == null || value.Length <= maxLength ? value : string.Concat(value.Substring(0, maxLength), suffix);
+			return value == null || value.Length <= maxLength ? value : string.Concat(value[0..], suffix);
 		}
 
 		/// <summary>
-		/// 	Determines whether the comparison value strig is contained within the input value string
+		/// 	Determines whether the comparison value string is contained within the input value string
 		/// </summary>
 		/// <param name = "inputValue">The input value.</param>
 		/// <param name = "comparisonValue">The comparison value.</param>
@@ -93,7 +93,7 @@ namespace ExtendAllTheThings.Extensions
 
 		/// <summary>
 		/// Centers a charters in this string, padding in both, left and right, by specified Unicode character,
-		/// for a specified total lenght.
+		/// for a specified total length.
 		/// </summary>
 		/// <param name="value">Instance value.</param>
 		/// <param name="width">The number of characters in the resulting string,
@@ -104,7 +104,7 @@ namespace ExtendAllTheThings.Extensions
 		/// more than the specified width.</param>
 		/// <returns>A new string that is equivalent to this instance,
 		/// but center-aligned with as many paddingChar characters as needed to create a
-		/// length of width paramether.</returns>
+		/// length of width parameter.</returns>
 		public static string PadBoth(this string value, int width, char padChar, bool truncate = false)
 		{
 			int diff = width - value.Length;
@@ -114,7 +114,7 @@ namespace ExtendAllTheThings.Extensions
 			}
 			else if (diff < 0)
 			{
-				return value.Substring(0, width);
+				return value[0..];
 			}
 			else
 			{
@@ -288,7 +288,7 @@ namespace ExtendAllTheThings.Extensions
 		public static string GetBefore(this string value, string x)
 		{
 			int xPos = value.IndexOf(x);
-			return xPos == -1 ? string.Empty : value.Substring(0, xPos);
+			return xPos == -1 ? string.Empty : value[0..];
 		}
 
 		/// <summary>
@@ -310,7 +310,7 @@ namespace ExtendAllTheThings.Extensions
 			}
 
 			int startIndex = xPos + x.Length;
-			return startIndex >= yPos ? string.Empty : value.Substring(startIndex, yPos - startIndex).Trim();
+			return startIndex >= yPos ? string.Empty : value[startIndex..yPos].Trim();
 		}
 
 		/// <summary>
@@ -330,7 +330,7 @@ namespace ExtendAllTheThings.Extensions
 			}
 
 			int startIndex = xPos + x.Length;
-			return startIndex >= value.Length ? string.Empty : value.Substring(startIndex).Trim();
+			return startIndex >= value.Length ? string.Empty : value[startIndex..].Trim();
 		}
 
 		/// <summary>
@@ -451,7 +451,7 @@ namespace ExtendAllTheThings.Extensions
 				throw new ArgumentOutOfRangeException(nameof(characterCount), characterCount, "characterCount must be less than length of string");
 			}
 
-			return value.Substring(0, characterCount);
+			return value[0..];
 		}
 
 		/// <summary>
@@ -472,7 +472,7 @@ namespace ExtendAllTheThings.Extensions
 				throw new ArgumentOutOfRangeException(nameof(characterCount), characterCount, "characterCount must be less than length of string");
 			}
 
-			return value.Substring(value.Length - characterCount);
+			return value[^characterCount..];
 		}
 
 		/// <summary>Returns the right part of the string from index.</summary>
@@ -481,7 +481,7 @@ namespace ExtendAllTheThings.Extensions
 		/// <returns>The right part.</returns>
 		public static string SubstringFrom(this string value, int index)
 		{
-			return index < 0 ? value : value.Substring(index, value.Length - index);
+			return index < 0 ? value : value[index..];
 		}
 
 		public static byte[] GetBytes(this string data)
@@ -514,7 +514,7 @@ namespace ExtendAllTheThings.Extensions
 			int index = singular.LastIndexOf(" of ");
 			if (index > 0)
 			{
-				return singular.Substring(0, index) + singular.Remove(0, index).ToPlural();
+				return singular[0..] + singular.Remove(0, index).ToPlural();
 			}
 
 			// single Word rules
@@ -989,7 +989,7 @@ namespace ExtendAllTheThings.Extensions
 		public enum ComparsionTemplateOptions
 		{
 			/// <summary>
-			/// Free template comparsion
+			/// Free template comparison
 			/// </summary>
 			Default,
 
@@ -1122,7 +1122,7 @@ namespace ExtendAllTheThings.Extensions
 		/// </summary>
 		/// <typeparam name="TEnum">The enum will use to check, the data defined.</typeparam>
 		/// <param name="dataToCheck">To match against enum.</param>
-		/// <returns>Anonoymous method for the condition.</returns>
+		/// <returns>Anonymous method for the condition.</returns>
 		/// <remarks>
 		/// 	Contributed by Mohammad Rahman, http://mohammad-rahman.blogspot.com/
 		/// </remarks>
@@ -1135,7 +1135,7 @@ namespace ExtendAllTheThings.Extensions
 		#endregion String to Enum
 
 		/// <summary>
-		/// Encodes the email address so that the link is still valid, but the email address is useless for email harvsters.
+		/// Encodes the email address so that the link is still valid, but the email address is useless for email harvesters.
 		/// </summary>
 		/// <param name="emailAddress">The email address.</param>
 		/// <returns></returns>
@@ -1177,15 +1177,15 @@ namespace ExtendAllTheThings.Extensions
 				}
 				if (repl.Length > 0)
 				{
-					tempHtmlEncode = tempHtmlEncode.Substring(0, i - 1) +
-													 repl + tempHtmlEncode.Substring(i);
+					tempHtmlEncode = tempHtmlEncode[0..] +
+													 repl + tempHtmlEncode[i..];
 				}
 			}
 			return tempHtmlEncode;
 		}
 
 		/// <summary>
-		/// Truncates a string with optional Elipses added
+		/// Truncates a string with optional Ellipses added
 		/// </summary>
 		/// <param name="this"></param>
 		/// <param name="length"></param>
@@ -1204,7 +1204,7 @@ namespace ExtendAllTheThings.Extensions
 				return @this;
 			}
 
-			return @this.Substring(0, length - e) + new string('.', e);
+			return @this[0..] + new string('.', e);
 		}
 
 		public static string Raw(this string str)
@@ -1223,27 +1223,27 @@ namespace ExtendAllTheThings.Extensions
 			}
 			else if (value.Length < 3)
 			{
-				return string.Format("({0})", value.Substring(0, value.Length));
+				return string.Format("({0})", value[0..]);
 			}
 			else if (value.Length < 7)
 			{
-				return string.Format("({0}) {1}", value.Substring(0, 3), value.Substring(3, value.Length - 3));
+				return string.Format("({0}) {1}", value[0..], value[3..]);
 			}
 			else if (value.Length < 11)
 			{
-				return string.Format("({0}) {1}-{2}", value.Substring(0, 3), value.Substring(3, 3), value.Substring(6));
+				return string.Format("({0}) {1}-{2}", value[0..], value[3..], value[6..]);
 			}
 			else if (value.Length > 10)
 			{
 				value = value.Remove(value.Length - 1, 1);
-				return string.Format("{0}.{1}.{2}", value.Substring(0, 3), value.Substring(3, 3), value.Substring(6));
+				return string.Format("{0}.{1}.{2}", value[0..], value[3..], value[6..]);
 			}
 			return value;
 		}
 
 		public static string GenerateSlug(this string phrase, int maxLength = 50)
 		{
-			var str = Regex.Replace(Regex.Replace(phrase.ToLower(), "[^a-z0-9\\s-]", ""), "[\\s-]{2,}", " ").Trim();
+			string str = Regex.Replace(Regex.Replace(phrase.ToLower(), "[^a-z0-9\\s-]", ""), "[\\s-]{2,}", " ").Trim();
 			return Regex.Replace(str.Substring(0, str.Length <= maxLength ? str.Length : maxLength).Trim(), "\\s", "-");
 		}
 	}
